@@ -8,6 +8,7 @@
     <modules>
         <module>account</module>
         <module>common</module>
+        <module>product</module>
     </modules>
 
     <properties>
