@@ -8,6 +8,7 @@
     <modules>
         <module>account</module>
         <module>common</module>
+        <module>product</module>
     </modules>
 
     <properties>
@@ -93,6 +94,11 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.f4b6a3</groupId>
+            <artifactId>uuid-creator</artifactId>
+            <version>6.1.1</version>
         </dependency>
     </dependencies>
 
