@@ -1,12 +1,11 @@
 package andefi.furnish.product.resource;
 
+import andefi.furnish.common.utility.CursorCodec;
 import andefi.furnish.product.model.Category;
 import andefi.furnish.product.model.Media;
 import andefi.furnish.product.model.Product;
 import andefi.furnish.product.model.Review;
-import andefi.furnish.product.payload.ProductDetailsResponse;
-import andefi.furnish.product.payload.ProductReviewsResponse;
-import andefi.furnish.product.payload.ProductSummaryResponse;
+import andefi.furnish.product.payload.*;
 import andefi.furnish.product.service.ProductService;
 import io.quarkus.security.Authenticated;
 import jakarta.inject.Inject;
@@ -24,28 +23,45 @@ public class ProductResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Authenticated
-  public Response getProductCatalog() {
-    List<Product> products = productService.getProductCatalog();
+  public Response getProductCatalog(
+      @QueryParam("limit") @DefaultValue("10") int limit, @QueryParam("cursor") String cursor) {
+    List<Product> products = productService.getProductCatalog(limit, cursor);
+    boolean hasMore = products.size() > limit;
+    String nextCursor = hasMore ? CursorCodec.encode(products.getLast().getId().toString()) : null;
 
-    List<ProductSummaryResponse> responses = new ArrayList<>();
-    for (Product product : products) {
-      String media = null;
+    List<ProductSummaryResponse> productSummaries =
+        products.stream()
+            .limit(limit)
+            .map(
+                it -> {
+                  String media = null;
+                  Set<String> categories =
+                      it.getCategories().stream()
+                          .map(Category::getName)
+                          .collect(Collectors.toSet());
 
-      if (!product.getMedia().isEmpty()) {
-        media = product.getMedia().getFirst().getUrl();
-      }
+                  if (!it.getMedia().isEmpty()) {
+                    media = it.getMedia().getFirst().getUrl();
+                  }
 
-      ProductSummaryResponse response = new ProductSummaryResponse();
-      response.setId(product.getId());
-      response.setName(product.getName());
-      response.setPrice(product.getPrice());
-      response.setDiscountPercentage(product.getDiscountPercentage());
-      response.setMedia(media);
+                  ProductSummaryResponse product = new ProductSummaryResponse();
+                  product.setId(it.getId());
+                  product.setName(it.getName());
+                  product.setPrice(it.getPrice());
+                  product.setDiscountPercentage(it.getDiscountPercentage());
+                  product.setCategories(categories);
+                  product.setMedia(media);
 
-      responses.add(response);
-    }
+                  return product;
+                })
+            .toList();
 
-    return Response.ok(responses).build();
+    ProductCatalogResponse response = new ProductCatalogResponse();
+    response.setProductSummaries(productSummaries);
+    response.setHasMore(hasMore);
+    response.setNextCursor(nextCursor);
+
+    return Response.ok(response).build();
   }
 
   @GET
@@ -77,24 +93,38 @@ public class ProductResource {
   @Path("/{product_id}/reviews")
   @Produces(MediaType.APPLICATION_JSON)
   @Authenticated
-  public Response getProductReviews(@PathParam("product_id") UUID id) {
-    List<Review> reviews = productService.getProductReviews(id);
+  public Response getProductReviews(
+      @PathParam("product_id") UUID id,
+      @QueryParam("limit") @DefaultValue("10") int limit,
+      @QueryParam("cursor") String cursor) {
+    List<Review> reviews = productService.getProductReviews(id, limit, cursor);
+    boolean hasMore = reviews.size() > limit;
+    String nextCursor = hasMore ? CursorCodec.encode(reviews.getLast().getId().toString()) : null;
 
-    List<ProductReviewsResponse> responses = new ArrayList<>();
+    List<ProductReviewResponse> productReviews =
+        reviews.stream()
+            .limit(limit)
+            .map(
+                it -> {
+                  List<String> media = it.getMedia().stream().map(Media::getUrl).toList();
 
-    for (Review review : reviews) {
-      List<String> media = review.getMedia().stream().map(Media::getUrl).toList();
+                  ProductReviewResponse review = new ProductReviewResponse();
+                  review.setId(it.getId());
+                  review.setAuthor(it.getAccount().getUsername());
+                  review.setContent(it.getContent());
+                  review.setRating(it.getRating());
+                  review.setMedia(media);
+                  review.setCreatedAt(it.getCreatedAt());
 
-      ProductReviewsResponse response = new ProductReviewsResponse();
-      response.setId(review.getId());
-      response.setAuthor(review.getAccount().getUsername());
-      response.setContent(review.getContent());
-      response.setRating(review.getRating());
-      response.setMedia(media);
+                  return review;
+                })
+            .toList();
 
-      responses.add(response);
-    }
+    ProductReviewsResponse response = new ProductReviewsResponse();
+    response.setProductReviews(productReviews);
+    response.setHasMore(hasMore);
+    response.setNextCursor(nextCursor);
 
-    return Response.ok(responses).build();
+    return Response.ok(response).build();
   }
 }

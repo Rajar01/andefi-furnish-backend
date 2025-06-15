@@ -15,7 +15,8 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "products")
 public class Product {
-  @Id @GeneratedValue private UUID id;
+  @Id private UUID id;
+
   @NotBlank private String name;
   @NotBlank private String description;
 
@@ -66,6 +67,10 @@ public class Product {
 
   public UUID getId() {
     return id;
+  }
+
+  public void setId(UUID id) {
+    this.id = id;
   }
 
   public String getName() {

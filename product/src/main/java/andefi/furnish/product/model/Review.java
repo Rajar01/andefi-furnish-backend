@@ -12,7 +12,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "reviews")
 public class Review {
-  @Id @GeneratedValue private UUID id;
+  @Id private UUID id;
   @NotBlank private String content;
   @NotNull private float rating;
 
@@ -47,6 +47,10 @@ public class Review {
 
   public UUID getId() {
     return id;
+  }
+
+  public void setId(UUID id) {
+    this.id = id;
   }
 
   public String getContent() {
