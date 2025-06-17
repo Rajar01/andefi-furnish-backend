@@ -31,6 +31,10 @@ public class AccountService {
 
   @Inject Redis redis;
 
+  public Account getAccountByEmail(String email) {
+    return accountRepository.findByEmail(email).orElseThrow(NotFoundException::new);
+  }
+
   public void createNewAccount(String email, String username, String password, String role) {
     Account account = new Account();
 
