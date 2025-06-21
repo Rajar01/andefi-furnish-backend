@@ -15,6 +15,7 @@ import jakarta.ws.rs.NotFoundException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -30,6 +31,10 @@ public class AccountService {
   @Inject JWTParser jwtParser;
 
   @Inject Redis redis;
+
+  public Account getAccountById(UUID id) {
+    return accountRepository.findByIdOptional(id).orElseThrow(NotFoundException::new);
+  }
 
   public Account getAccountByEmail(String email) {
     return accountRepository.findByEmail(email).orElseThrow(NotFoundException::new);
