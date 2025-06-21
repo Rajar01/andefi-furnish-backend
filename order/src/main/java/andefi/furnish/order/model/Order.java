@@ -18,17 +18,29 @@ public class Order {
   @JoinColumn(name = "account_id")
   private Account account;
 
-  @OneToMany(mappedBy = "order")
-  private List<OrderItem> items;
+  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<OrderItem> orderItems;
 
-  @NotNull private BigDecimal amount;
+  private BigDecimal amount;
 
-  @OneToOne
+  @ManyToOne
   @NotNull
   @JoinColumn(name = "shipping_address_id")
   private ShippingAddress shippingAddress;
 
-  private OrderStatus status;
+  @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  private Payment payment;
+
+  private OrderStatus status = OrderStatus.UNPAID;
+
+  @Column(name = "paid_at")
+  private Instant paidAt = null;
+
+  @Column(name = "shipping_at")
+  private Instant shippingAt = null;
+
+  @Column(name = "completed_at")
+  private Instant completedAt = null;
 
   @NotNull
   @Column(name = "created_at")
@@ -61,12 +73,12 @@ public class Order {
     this.account = account;
   }
 
-  public List<OrderItem> getItems() {
-    return items;
+  public List<OrderItem> getOrderItems() {
+    return orderItems;
   }
 
-  public void setItems(List<OrderItem> items) {
-    this.items = items;
+  public void setOrderItems(List<OrderItem> orderItems) {
+    this.orderItems = orderItems;
   }
 
   public BigDecimal getAmount() {
@@ -85,12 +97,44 @@ public class Order {
     this.shippingAddress = shippingAddress;
   }
 
+  public Payment getPayment() {
+    return payment;
+  }
+
+  public void setPayment(Payment payment) {
+    this.payment = payment;
+  }
+
   public OrderStatus getStatus() {
     return status;
   }
 
   public void setStatus(OrderStatus status) {
     this.status = status;
+  }
+
+  public Instant getPaidAt() {
+    return paidAt;
+  }
+
+  public void setPaidAt(Instant paidAt) {
+    this.paidAt = paidAt;
+  }
+
+  public Instant getShippingAt() {
+    return shippingAt;
+  }
+
+  public void setShippingAt(Instant shippingAt) {
+    this.shippingAt = shippingAt;
+  }
+
+  public Instant getCompletedAt() {
+    return completedAt;
+  }
+
+  public void setCompletedAt(Instant completedAt) {
+    this.completedAt = completedAt;
   }
 
   public Instant getCreatedAt() {

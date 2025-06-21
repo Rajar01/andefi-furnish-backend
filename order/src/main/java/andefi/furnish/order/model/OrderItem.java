@@ -13,22 +13,23 @@ public class OrderItem {
   @Id @GeneratedValue private UUID id;
 
   @ManyToOne
-  @NotNull
   @JoinColumn(name = "order_id")
   private Order order;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.ALL)
   @NotNull
   @JoinColumn(name = "product_id")
   private Product product;
 
-  @NotNull private Long quantity;
-
-  @Column(name = "price_per_item")
   @NotNull
-  private BigDecimal pricePerItem;
+  @Column(name = "current_unit_price")
+  private BigDecimal currentUnitPrice;
 
-  @NotNull private BigDecimal amount;
+  @NotNull
+  @Column(name = "current_discount_percentage")
+  private Double currentDiscountPercentage;
+
+  @NotNull private Long quantity;
 
   @NotNull
   @Column(name = "created_at")
@@ -69,28 +70,28 @@ public class OrderItem {
     this.product = product;
   }
 
+  public BigDecimal getCurrentUnitPrice() {
+    return currentUnitPrice;
+  }
+
+  public void setCurrentUnitPrice(BigDecimal currentUnitPrice) {
+    this.currentUnitPrice = currentUnitPrice;
+  }
+
+  public Double getCurrentDiscountPercentage() {
+    return currentDiscountPercentage;
+  }
+
+  public void setCurrentDiscountPercentage(Double currentDiscountPercentage) {
+    this.currentDiscountPercentage = currentDiscountPercentage;
+  }
+
   public Long getQuantity() {
     return quantity;
   }
 
   public void setQuantity(Long quantity) {
     this.quantity = quantity;
-  }
-
-  public BigDecimal getPricePerItem() {
-    return pricePerItem;
-  }
-
-  public void setPricePerItem(BigDecimal pricePerItem) {
-    this.pricePerItem = pricePerItem;
-  }
-
-  public BigDecimal getAmount() {
-    return amount;
-  }
-
-  public void setAmount(BigDecimal amount) {
-    this.amount = amount;
   }
 
   public Instant getCreatedAt() {
