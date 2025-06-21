@@ -1,5 +1,6 @@
 package andefi.furnish.account.service;
 
+import andefi.furnish.account.model.Account;
 import andefi.furnish.account.properties.JwtProperties;
 import io.quarkus.redis.datasource.ReactiveRedisDataSource;
 import io.quarkus.redis.datasource.RedisDataSource;
@@ -19,6 +20,8 @@ public class JwtTokenService {
   private final ValueCommands<String, String> valueCommands;
   private final ReactiveKeyCommands<String> keyCommands;
 
+  @Inject AccountService accountService;
+
   @Inject JwtProperties properties;
 
   public JwtTokenService(RedisDataSource ds, ReactiveRedisDataSource reactive) {
@@ -27,14 +30,17 @@ public class JwtTokenService {
   }
 
   public String generateToken(String email, String username, String role) {
+    Account account = accountService.getAccountByEmail(email);
+
     Instant now = Instant.now();
 
     JwtClaimsBuilder jwtClaimsBuilder =
         Jwt.issuer(properties.issuer)
-            .subject(username)
+            .subject(account.getId().toString())
             .issuedAt(now)
             .expiresAt(now.plus(properties.expirationDuration, properties.expirationTimeUnit))
-            .claim(Claims.email.name(), email);
+            .claim(Claims.email.name(), email)
+            .claim(Claims.preferred_username.name(), username);
 
     if (role != null && !role.isEmpty()) {
       jwtClaimsBuilder.groups(new HashSet<>(Collections.singletonList(role)));

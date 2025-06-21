@@ -1,9 +1,9 @@
 package andefi.furnish.product.service;
 
+import andefi.furnish.common.utility.CursorCodec;
 import andefi.furnish.product.model.Product;
 import andefi.furnish.product.model.Review;
 import andefi.furnish.product.repository.ProductRepository;
-import andefi.furnish.common.utility.CursorCodec;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -49,7 +49,7 @@ public class ProductService {
     return products;
   }
 
-  public Product getProductDetails(UUID id) {
+  public Product getProductById(UUID id) {
     Product product = productRepository.findByIdOptional(id).orElseThrow(NotFoundException::new);
     product.setMedia(mediaService.getProductMedia(product.getId()));
 

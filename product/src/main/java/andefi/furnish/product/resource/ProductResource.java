@@ -69,7 +69,7 @@ public class ProductResource {
   @Produces(MediaType.APPLICATION_JSON)
   @Authenticated
   public Response getProductDetails(@PathParam("product_id") UUID id) {
-    Product product = productService.getProductDetails(id);
+    Product product = productService.getProductById(id);
 
     Set<String> categories =
         product.getCategories().stream().map(Category::getName).collect(Collectors.toSet());

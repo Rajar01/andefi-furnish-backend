@@ -15,7 +15,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/api/account")
+@Path("/api/accounts")
 public class AccountResource {
   @Inject AccountService accountService;
 
