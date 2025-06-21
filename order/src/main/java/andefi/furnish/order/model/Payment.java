@@ -13,13 +13,14 @@ public class Payment {
   @Id @GeneratedValue private UUID id;
 
   @OneToOne
-  @NotNull
   @JoinColumn(name = "order_id")
   private Order order;
 
-  @NotNull private Currency currency;
-  @NotNull private BigDecimal amount;
-  private PaymentStatus status;
+  private Currency currency = Currency.getInstance("IDR");
+
+  private BigDecimal amount;
+
+  private PaymentStatus status = PaymentStatus.UNPAID;
 
   @NotNull
   @Column(name = "created_at")
