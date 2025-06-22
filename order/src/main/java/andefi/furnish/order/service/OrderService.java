@@ -2,21 +2,22 @@ package andefi.furnish.order.service;
 
 import andefi.furnish.account.model.Account;
 import andefi.furnish.account.service.AccountService;
-import andefi.furnish.order.model.Order;
-import andefi.furnish.order.model.OrderItem;
-import andefi.furnish.order.model.Payment;
-import andefi.furnish.order.model.ShippingAddress;
+import andefi.furnish.order.model.*;
 import andefi.furnish.order.payload.CreateOrderRequestBody;
+import andefi.furnish.order.payload.CreateTransactionTokenRequestBody;
 import andefi.furnish.order.payload.GetOrderItemResponse;
 import andefi.furnish.order.payload.GetOrderResponse;
 import andefi.furnish.order.repository.OrderRepository;
 import andefi.furnish.product.model.Product;
 import andefi.furnish.product.service.ProductService;
+import com.midtrans.httpclient.error.MidtransError;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -24,6 +25,7 @@ public class OrderService {
   @Inject AccountService accountService;
   @Inject ProductService productService;
   @Inject ShippingAddressService shippingAddressService;
+  @Inject PaymentService paymentService;
 
   @Inject OrderRepository orderRepository;
 
@@ -66,6 +68,7 @@ public class OrderService {
 
     Payment payment = new Payment();
     payment.setOrder(order);
+    payment.setAccount(account);
 
     order.setPayment(payment);
 
@@ -77,6 +80,10 @@ public class OrderService {
     order.setShippingAddress(shippingAddress);
 
     orderRepository.persist(order);
+  }
+
+  public Optional<Order> getOrderById(UUID id) {
+    return orderRepository.findByIdOptional(id);
   }
 
   public List<GetOrderResponse> getOrdersByAccountId(UUID id) {
@@ -112,7 +119,7 @@ public class OrderService {
               order.setAmount(o.getAmount());
               order.setShippingAddress(o.getShippingAddress().getAddress());
               order.setCreatedAt(o.getCreatedAt());
-              order.setPaidAt(o.getPaidAt());
+              order.setPaidAt(o.getPayment().getPaidAt());
               order.setShippingAt(o.getShippingAt());
               order.setCompletedAt(o.getCompletedAt());
               order.setOrderStatus(o.getStatus().toString());
@@ -120,5 +127,31 @@ public class OrderService {
               return order;
             })
         .toList();
+  }
+
+  public String payOrderedItems(UUID accountId, UUID orderId) {
+    try {
+      Account account = accountService.getAccountById(accountId);
+      Order order = orderRepository.findByIdOptional(orderId).orElseThrow(NotFoundException::new);
+      ShippingAddress shippingAddress = order.getShippingAddress();
+
+      CreateTransactionTokenRequestBody payload =
+          new CreateTransactionTokenRequestBody(account, order, shippingAddress);
+
+      return paymentService.createTransactionToken(payload);
+    } catch (MidtransError e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Transactional
+  public void updateOrderStatus(UUID orderId, OrderStatus orderStatus) {
+    orderRepository
+        .findByIdOptional(orderId)
+        .ifPresent(
+            it -> {
+              it.setStatus(orderStatus);
+              orderRepository.persist(it);
+            });
   }
 }

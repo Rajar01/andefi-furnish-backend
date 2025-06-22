@@ -44,4 +44,14 @@ public class OrderResource {
 
     return Response.ok(response).build();
   }
+
+  @POST
+  @Path("/{order_id}/pay")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Authenticated
+  public Response payOrderedItems(@PathParam("order_id") UUID orderId) {
+    String token = orderService.payOrderedItems(UUID.fromString(accountId), orderId);
+
+    return Response.ok(token).build();
+  }
 }
