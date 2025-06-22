@@ -29,7 +29,7 @@ public class Payment {
   @Column(name = "paid_at")
   private Instant paidAt = null;
 
-  private PaymentStatus status;
+  private String status;
 
   @Column(name = "transaction_id")
   private UUID transactionId;
@@ -105,11 +105,11 @@ public class Payment {
     this.paidAt = paidAt;
   }
 
-  public PaymentStatus getStatus() {
+  public String getStatus() {
     return status;
   }
 
-  public void setStatus(PaymentStatus status) {
+  public void setStatus(String status) {
     this.status = status;
   }
 

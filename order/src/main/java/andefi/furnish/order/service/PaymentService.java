@@ -19,10 +19,7 @@ import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Currency;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @ApplicationScoped
 public class PaymentService {
@@ -91,18 +88,18 @@ public class PaymentService {
         orderService.getOrderById(payload.getOrderId()).orElseThrow(NotFoundException::new);
 
     Payment payment = order.getPayment();
-    PaymentStatus paymentStatus = PaymentStatus.fromString(payload.getTransactionStatus());
+    String paymentStatus = payload.getTransactionStatus();
 
-    if (order.getPayment().getStatus()
-        == PaymentStatus.fromString(payload.getTransactionStatus())) {
+    if (Objects.equals(order.getPayment().getStatus(), payload.getTransactionStatus())) {
       return Response.ok().build();
     }
 
     // Process payment notification
-    FraudStatus fraudStatus = FraudStatus.fromString(payload.getFraudStatus());
+    String fraudStatus = payload.getFraudStatus();
 
-    if ((paymentStatus == PaymentStatus.SETTLEMENT || paymentStatus == PaymentStatus.CAPTURE)
-        && fraudStatus == FraudStatus.ACCEPT) {
+    if ((Objects.equals(paymentStatus, PaymentStatus.SETTLEMENT.toString())
+            || Objects.equals(paymentStatus, PaymentStatus.CAPTURE.toString()))
+        && Objects.equals(fraudStatus, FraudStatus.ACCEPT.toString())) {
       payment.setMethod(payload.getPaymentType());
       payment.setCurrency(Currency.getInstance(payload.getCurrency()));
       payment.setAmount((long) Double.parseDouble(payload.getGrossAmount()));
