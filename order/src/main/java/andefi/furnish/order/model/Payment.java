@@ -1,8 +1,8 @@
 package andefi.furnish.order.model;
 
+import andefi.furnish.account.model.Account;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Currency;
 import java.util.UUID;
@@ -12,15 +12,27 @@ import java.util.UUID;
 public class Payment {
   @Id @GeneratedValue private UUID id;
 
+  @ManyToOne
+  @JoinColumn(name = "account_id")
+  private Account account;
+
   @OneToOne
   @JoinColumn(name = "order_id")
   private Order order;
 
-  private Currency currency = Currency.getInstance("IDR");
+  private String method;
 
-  private BigDecimal amount;
+  private Currency currency;
 
-  private PaymentStatus status = PaymentStatus.UNPAID;
+  private Long amount;
+
+  @Column(name = "paid_at")
+  private Instant paidAt = null;
+
+  private PaymentStatus status;
+
+  @Column(name = "transaction_id")
+  private UUID transactionId;
 
   @NotNull
   @Column(name = "created_at")
@@ -45,12 +57,28 @@ public class Payment {
     return id;
   }
 
+  public Account getAccount() {
+    return account;
+  }
+
+  public void setAccount(Account account) {
+    this.account = account;
+  }
+
   public Order getOrder() {
     return order;
   }
 
   public void setOrder(Order order) {
     this.order = order;
+  }
+
+  public String getMethod() {
+    return method;
+  }
+
+  public void setMethod(String method) {
+    this.method = method;
   }
 
   public Currency getCurrency() {
@@ -61,12 +89,20 @@ public class Payment {
     this.currency = currency;
   }
 
-  public BigDecimal getAmount() {
+  public Long getAmount() {
     return amount;
   }
 
-  public void setAmount(BigDecimal amount) {
+  public void setAmount(Long amount) {
     this.amount = amount;
+  }
+
+  public Instant getPaidAt() {
+    return paidAt;
+  }
+
+  public void setPaidAt(Instant paidAt) {
+    this.paidAt = paidAt;
   }
 
   public PaymentStatus getStatus() {
@@ -75,6 +111,14 @@ public class Payment {
 
   public void setStatus(PaymentStatus status) {
     this.status = status;
+  }
+
+  public UUID getTransactionId() {
+    return transactionId;
+  }
+
+  public void setTransactionId(UUID transactionId) {
+    this.transactionId = transactionId;
   }
 
   public Instant getCreatedAt() {

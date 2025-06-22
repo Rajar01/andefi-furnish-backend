@@ -2,6 +2,7 @@ package andefi.furnish.order.model;
 
 public enum OrderStatus {
   UNPAID("unpaid"),
+  PAID("paid"),
   PACKED("packed"),
   SHIPPED("shipped"),
   COMPLETED("completed"),

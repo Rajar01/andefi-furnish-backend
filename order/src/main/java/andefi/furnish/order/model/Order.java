@@ -33,9 +33,6 @@ public class Order {
 
   private OrderStatus status = OrderStatus.UNPAID;
 
-  @Column(name = "paid_at")
-  private Instant paidAt = null;
-
   @Column(name = "shipping_at")
   private Instant shippingAt = null;
 
@@ -111,14 +108,6 @@ public class Order {
 
   public void setStatus(OrderStatus status) {
     this.status = status;
-  }
-
-  public Instant getPaidAt() {
-    return paidAt;
-  }
-
-  public void setPaidAt(Instant paidAt) {
-    this.paidAt = paidAt;
   }
 
   public Instant getShippingAt() {
